@@ -45,7 +45,7 @@
                 id="nickname" name="nickname" type="text"
                 class="field-input"
                 value="{{ old('nickname') }}"
-                placeholder="contoh: budi_99"
+                placeholder="contoh: alifrizal"
                 required autocomplete="off"
                 x-data @input="$el.value = $el.value.toLowerCase()">
             <div style="font-size:11px;color:#64748b;margin-top:4px">
