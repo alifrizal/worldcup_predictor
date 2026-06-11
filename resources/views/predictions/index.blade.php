@@ -1,0 +1,166 @@
+<x-app-layout>
+    <x-slot name="header">Prediksi</x-slot>
+
+    {{-- FLASH --}}
+    @if (session('success'))
+    <div class="flash-success">✅ {{ session('success') }}</div>
+    @endif
+    @if (session('error'))
+    <div class="flash-error">⚠️ {{ session('error') }}</div>
+    @endif
+
+    {{-- ── UPCOMING & LIVE ──────────────────── --}}
+    <div style="margin-bottom:28px">
+        <div class="section-eyebrow">Tebak Sekarang</div>
+        <div class="section-title">Upcoming & Live</div>
+
+        @forelse ($upcomingFixtures as $fixture)
+        @php
+        $prediction = $userPredictions[$fixture->id] ?? null;
+        $isLocked = $fixture->isLocked();
+        @endphp
+
+        <div class="card" style="margin-bottom:10px">
+
+            {{-- Header --}}
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+                <span style="font-size:11px;color:#64748b">
+                    {{ $fixture->match_time->timezone('Asia/Jakarta')->format('d M · H:i') }} WIB
+                    @if ($fixture->group) · Grup {{ $fixture->group }} @endif
+                </span>
+
+                @if ($fixture->status === 'live')
+                <span class="live-badge">
+                    <span class="live-dot"></span> LIVE
+                </span>
+                @elseif ($isLocked)
+                <span style="font-size:11px;color:#475569;font-weight:600">🔒 Terkunci</span>
+                @else
+                <span style="font-size:11px;color:#00ff87;font-weight:600">Buka</span>
+                @endif
+            </div>
+
+            {{-- Tim --}}
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+                <div style="flex:1;display:flex;align-items:center;gap:8px">
+                    <span style="font-size:24px">{{ $fixture->homeTeam->flag_emoji }}</span>
+                    <span style="font-size:13px;font-weight:600;color:#f0f4f8">{{ $fixture->homeTeam->name }}</span>
+                </div>
+                <span style="font-size:11px;font-weight:700;color:#475569">VS</span>
+                <div style="flex:1;display:flex;align-items:center;justify-content:flex-end;gap:8px">
+                    <span style="font-size:13px;font-weight:600;color:#f0f4f8">{{ $fixture->awayTeam->name }}</span>
+                    <span style="font-size:24px">{{ $fixture->awayTeam->flag_emoji }}</span>
+                </div>
+            </div>
+
+            {{-- Form / Tebakan --}}
+            @if (!$isLocked)
+            <form method="POST" action="{{ route('predictions.store') }}">
+                @csrf
+                <input type="hidden" name="match_id" value="{{ $fixture->id }}">
+                <div style="display:flex;align-items:center;gap:8px">
+                    <input type="number" name="home_score"
+                        value="{{ old('home_score', $prediction?->home_score ?? '') }}"
+                        min="0" max="99" placeholder="0"
+                        style="flex:1;background:#0a0f1e;border:1px solid #1e2d45;border-radius:10px;padding:10px;color:#f0f4f8;font-size:22px;font-weight:900;text-align:center;outline:none;font-family:'Barlow Condensed',sans-serif"
+                        onfocus="this.style.borderColor='#00ff87'" onblur="this.style.borderColor='#1e2d45'">
+                    <span style="color:#475569;font-weight:900;font-size:18px">–</span>
+                    <input type="number" name="away_score"
+                        value="{{ old('away_score', $prediction?->away_score ?? '') }}"
+                        min="0" max="99" placeholder="0"
+                        style="flex:1;background:#0a0f1e;border:1px solid #1e2d45;border-radius:10px;padding:10px;color:#f0f4f8;font-size:22px;font-weight:900;text-align:center;outline:none;font-family:'Barlow Condensed',sans-serif"
+                        onfocus="this.style.borderColor='#00ff87'" onblur="this.style.borderColor='#1e2d45'">
+                    <button type="submit"
+                        style="padding:10px 18px;background:#00ff87;color:#0a0f1e;font-size:13px;font-weight:700;border:none;border-radius:10px;cursor:pointer;white-space:nowrap">
+                        {{ $prediction ? 'Ubah' : 'Tebak' }}
+                    </button>
+                </div>
+                @if ($prediction)
+                <div style="text-align:center;font-size:11px;color:#475569;margin-top:8px">
+                    Tebakan kamu: <strong style="color:#94a3b8">{{ $prediction->home_score }} – {{ $prediction->away_score }}</strong>
+                </div>
+                @endif
+            </form>
+            @else
+            <div style="text-align:center">
+                @if ($prediction)
+                <div style="font-size:11px;color:#475569;margin-bottom:4px">Tebakan kamu</div>
+                <div style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;color:#94a3b8">
+                    {{ $prediction->home_score }} – {{ $prediction->away_score }}
+                </div>
+                @else
+                <div style="font-size:13px;color:#475569;font-style:italic">Tidak memasang tebakan</div>
+                @endif
+            </div>
+            @endif
+
+        </div>
+        @empty
+        <div class="empty-state">
+            <div class="icon">🎉</div>
+            <p>Tidak ada pertandingan mendatang saat ini.</p>
+        </div>
+        @endforelse
+    </div>
+
+    {{-- ── HASIL TERBARU ─────────────────────── --}}
+    @if ($finishedFixtures->isNotEmpty())
+    <div>
+        <div class="section-eyebrow">Selesai</div>
+        <div class="section-title">Hasil Terbaru</div>
+
+        <div style="display:flex;flex-direction:column;gap:8px">
+            @foreach ($finishedFixtures as $fixture)
+            @php
+            $prediction = $fixture->predictions->first();
+            $badgeClass = match($prediction?->result_type) {
+            'exact' => 'badge-exact',
+            'close' => 'badge-close',
+            'result' => 'badge-result',
+            'wrong' => 'badge-wrong',
+            default => 'badge-pending',
+            };
+            $badgeLabel = match($prediction?->result_type) {
+            'exact' => 'Exact +3',
+            'close' => 'Close +1.5',
+            'result' => 'Result +1',
+            'wrong' => 'Wrong +0',
+            default => 'Menunggu',
+            };
+            @endphp
+
+            <div class="card" style="padding:14px 16px">
+                <div style="display:flex;align-items:center;gap:10px">
+                    <div style="flex:1;min-width:0">
+                        <div style="font-size:11px;color:#475569;margin-bottom:6px">
+                            {{ $fixture->match_time->timezone('Asia/Jakarta')->format('d M · H:i') }} WIB
+                        </div>
+                        <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px">
+                            <span>{{ $fixture->homeTeam->flag_emoji }} {{ $fixture->homeTeam->name }}</span>
+                            <span style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:#f0f4f8;margin:0 8px">
+                                {{ $fixture->home_score }} – {{ $fixture->away_score }}
+                            </span>
+                            <span>{{ $fixture->awayTeam->name }} {{ $fixture->awayTeam->flag_emoji }}</span>
+                        </div>
+                        @if ($prediction)
+                        <div style="font-size:11px;color:#475569;margin-top:4px">
+                            Tebakan: <strong style="color:#64748b">{{ $prediction->home_score }}–{{ $prediction->away_score }}</strong>
+                        </div>
+                        @endif
+                    </div>
+                    <div style="flex-shrink:0;text-align:right">
+                        @if ($prediction)
+                        <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:#f0f4f8;margin-bottom:4px">
+                            +{{ number_format($prediction->points, 1) }}
+                        </div>
+                        @endif
+                        <span class="badge {{ $badgeClass }}">{{ $badgeLabel }}</span>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+</x-app-layout>
