@@ -19,7 +19,7 @@ class PredictionController extends Controller
         $upcomingFixtures = Fixture::with(['homeTeam', 'awayTeam'])
             ->whereIn('status', ['scheduled', 'live'])
             ->orderBy('match_time')
-            ->limit(20)
+            // ->limit(20)
             ->get();
 
         // Ambil semua match yang sudah selesai beserta prediksi user

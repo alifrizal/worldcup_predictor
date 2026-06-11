@@ -13,7 +13,7 @@
             {{-- PILIH KOTA --}}
             <form method="GET" action="{{ route('rankings.location') }}" class="mb-4">
                 <select name="city_id" onchange="this.form.submit()"
-                    class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg shadow-sm text-sm">
+                    class="field-input">
                     <optgroup label="🇮🇩 Indonesia">
                         @foreach ($cities->where('region', 'indonesia') as $c)
                         <option value="{{ $c->id }}" {{ $city?->id == $c->id ? 'selected' : '' }}>

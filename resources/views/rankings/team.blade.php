@@ -13,7 +13,7 @@
             {{-- PILIH TIM --}}
             <form method="GET" action="{{ route('rankings.team') }}" class="mb-4">
                 <select name="team_id" onchange="this.form.submit()"
-                    class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg shadow-sm text-sm">
+                    class="field-input">
                     @foreach ($teams->groupBy('group') as $group => $groupTeams)
                     <optgroup label="Grup {{ $group }}">
                         @foreach ($groupTeams as $t)
