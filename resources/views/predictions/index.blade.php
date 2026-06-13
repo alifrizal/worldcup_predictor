@@ -55,23 +55,37 @@
 
             {{-- Form / Tebakan --}}
             @if (!$isLocked)
+            @php
+                $homeVal   = old('home_score', $prediction?->home_score ?? null);
+                $awayVal   = old('away_score', $prediction?->away_score ?? null);
+                $hasValues = !is_null($homeVal) && !is_null($awayVal);
+            @endphp
             <form method="POST" action="{{ route('predictions.store') }}">
                 @csrf
                 <input type="hidden" name="match_id" value="{{ $fixture->id }}">
                 <div style="display:flex;align-items:center;gap:8px">
                     <input type="number" name="home_score"
-                        value="{{ old('home_score', $prediction?->home_score ?? '') }}"
-                        min="0" max="99" placeholder="0"
+                        id="home-{{ $fixture->id }}"
+                        value="{{ $homeVal ?? '' }}"
+                        min="0" max="99" step="1"
+                        placeholder="0"
+                        inputmode="numeric"
                         style="flex:1;background:#0a0f1e;border:1px solid #1e2d45;border-radius:10px;padding:10px;color:#f0f4f8;font-size:22px;font-weight:900;text-align:center;outline:none;font-family:'Barlow Condensed',sans-serif"
                         onfocus="this.style.borderColor='#00ff87'" onblur="this.style.borderColor='#1e2d45'">
                     <span style="color:#475569;font-weight:900;font-size:18px">–</span>
                     <input type="number" name="away_score"
-                        value="{{ old('away_score', $prediction?->away_score ?? '') }}"
-                        min="0" max="99" placeholder="0"
+                        id="away-{{ $fixture->id }}"
+                        value="{{ $awayVal ?? '' }}"
+                        min="0" max="99" step="1"
+                        placeholder="0"
+                        inputmode="numeric"
                         style="flex:1;background:#0a0f1e;border:1px solid #1e2d45;border-radius:10px;padding:10px;color:#f0f4f8;font-size:22px;font-weight:900;text-align:center;outline:none;font-family:'Barlow Condensed',sans-serif"
                         onfocus="this.style.borderColor='#00ff87'" onblur="this.style.borderColor='#1e2d45'">
                     <button type="submit"
-                        style="padding:10px 18px;background:#00ff87;color:#0a0f1e;font-size:13px;font-weight:700;border:none;border-radius:10px;cursor:pointer;white-space:nowrap">
+                        id="btn-{{ $fixture->id }}"
+                        {{ !$hasValues ? 'disabled' : '' }}
+                        style="padding:10px 18px;font-size:13px;font-weight:700;border:none;border-radius:10px;white-space:nowrap;
+                           {{ !$hasValues ? 'background:#1e2d45;color:#475569;cursor:not-allowed' : 'background:#00ff87;color:#0a0f1e;cursor:pointer' }}">
                         {{ $prediction ? 'Ubah' : 'Tebak' }}
                     </button>
                 </div>
@@ -101,6 +115,43 @@
             <p>Tidak ada pertandingan mendatang saat ini.</p>
         </div>
         @endforelse
+
+        <script>
+        function checkBtn(id) {
+            const home = document.getElementById('home-' + id);
+            const away = document.getElementById('away-' + id);
+            const btn  = document.getElementById('btn-' + id);
+
+            if (!home || !away || !btn) return;
+
+            const filled = home.value !== '' && away.value !== '';
+
+            btn.disabled         = !filled;
+            btn.style.background = filled ? '#00ff87' : '#1e2d45';
+            btn.style.color      = filled ? '#0a0f1e' : '#475569';
+            btn.style.cursor     = filled ? 'pointer'  : 'not-allowed';
+        }
+        function sanitizeInput(el) {
+            el.value = el.value.replace(/[^0-9]/g, '');
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            // Attach event ke semua input home & away
+            document.querySelectorAll('input[id^="home-"], input[id^="away-"]').forEach(function (input) {
+                const id = input.id.replace('home-', '').replace('away-', '');
+
+                input.addEventListener('input', function () {
+                    sanitizeInput(this);
+                    checkBtn(id);
+                });
+            });
+
+            // Cek semua tombol saat halaman load
+            document.querySelectorAll('button[id^="btn-"]').forEach(function (btn) {
+                const id = btn.id.replace('btn-', '');
+                checkBtn(id);
+            });
+        });
+        </script>
     </div>
 
     {{-- ── HASIL TERBARU ─────────────────────── --}}

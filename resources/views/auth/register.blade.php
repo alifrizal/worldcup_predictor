@@ -17,7 +17,7 @@
                 class="field-input"
                 value="{{ old('name') }}"
                 placeholder="contoh: Alif Rizal"
-                required autocomplete="off"
+                required autofocus autocomplete="off"
                 x-data @input="$el.value">
             @error('name')
             <div class="field-error">{{ $message }}</div>
@@ -32,7 +32,7 @@
                 class="field-input"
                 value="{{ old('email') }}"
                 placeholder="kamu@email.com"
-                required autofocus autocomplete="email">
+                required autocomplete="email">
             @error('email')
             <div class="field-error">{{ $message }}</div>
             @enderror
