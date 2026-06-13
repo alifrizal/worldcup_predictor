@@ -15,8 +15,8 @@ build:
   allow_failure: false
   script:
     - cp $ENV .env
-    - docker build -t registry.gitlab.com/mirhmzh/ndukunpd:latest .
-    - docker push registry.gitlab.com/mirhmzh/ndukunpd:latest
+    - docker build -t registry.gitlab.com/alifrizal13/ndukunpd:latest .
+    - docker push registry.gitlab.com/alifrizal13/ndukunpd:latest
   when: manual
 
 deploy:
