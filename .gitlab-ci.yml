@@ -12,6 +12,7 @@ build:
   image: docker:29
   services:
     - docker:dind
+  allow_failure: false
   script:
     - cp $ENV .env
     - docker build -t registry.gitlab.com/mirhmzh/ndukunpd:latest .
