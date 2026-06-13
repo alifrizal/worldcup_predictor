@@ -6,7 +6,6 @@ services:
             backend:
                 ipv4_address: 172.20.2.61
             database:
-            internet:
         volumes:
             - /home/amirudeen/ndukunpd/storage:/var/www/storage
         logging:
