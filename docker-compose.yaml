@@ -1,6 +1,6 @@
 services:
     ndukunpd:
-        image: registry.gitlab.com/mirhmzh/ndukunpd:latest
+        image: registry.gitlab.com/alifrizal13/ndukun-pd2026:latest
         container_name: ndukunpd
         networks:
             backend:
