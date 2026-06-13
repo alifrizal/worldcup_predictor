@@ -1,0 +1,22 @@
+services:
+    ndukunpd:
+        image: registry.gitlab.com/mirhmzh/ndukunpd:latest
+        container_name: ndukunpd
+        networks:
+            backend:
+                ipv4_address: 172.20.2.61
+            database:
+            internet:
+        volumes:
+            - /home/amirudeen/ndukunpd/storage:/var/www/storage
+        logging:
+            options:
+                max-size: 10m
+
+networks:
+    backend:
+        name: backend
+        external: true
+    database:
+        name: database
+        external: true

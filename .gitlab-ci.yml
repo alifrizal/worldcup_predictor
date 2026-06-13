@@ -1,0 +1,28 @@
+stages:
+  - build
+  - deploy
+
+before_script:
+  - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
+after_script:
+  - docker logout registry.gitlab.com
+
+build:
+  stage: build
+  image: docker:29
+  services:
+    - docker:dind
+  script:
+    - cp $ENV .env
+    - docker build -t registry.gitlab.com/mirhmzh/ndukunpd:latest .
+    - docker push registry.gitlab.com/mirhmzh/ndukunpd:latest
+  when: manual
+
+deploy:
+  stage: deploy
+  script:
+    - docker-compose pull ndukunpd
+    - docker-compose up -d ndukunpd
+  tags:
+    - orionpax-docker
+  needs: [build]
