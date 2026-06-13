@@ -23,9 +23,7 @@ RUN apt-get update && apt-get install -y \
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get install -y nodejs
 
-# Install Swoole extension
-RUN pecl install swoole \
-    && docker-php-ext-enable swoole
+# No Swoole/Octane: use built-in PHP server instead
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -43,9 +41,6 @@ RUN composer install --no-dev --optimize-autoloader
 RUN npm ci
 RUN npm run build
 
-# Ensure Octane is configured
-RUN php artisan octane:install --server=swoole --no-interaction
-
 # Run post-install scripts
 RUN composer run-script post-autoload-dump
 
@@ -59,8 +54,8 @@ RUN php artisan storage:link --force
 # Clean up Node.js to reduce image size
 RUN apt-get remove -y nodejs && apt-get autoremove -y
 
-# Expose port for Swoole
+# Expose port for the application
 EXPOSE 8000
 
-# Start Swoole server
-CMD ["php", "artisan", "octane:start", "--host=0.0.0.0", "--port=8000"]
+# Start the application using PHP's built-in server
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
