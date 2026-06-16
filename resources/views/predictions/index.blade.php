@@ -24,19 +24,42 @@
 
             {{-- Header --}}
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-                <span style="font-size:11px;color:#64748b">
-                    {{ $fixture->match_time->timezone('Asia/Jakarta')->format('d M · H:i') }} WIB
-                    @if ($fixture->group) · Grup {{ $fixture->group }} @endif
-                </span>
+                <div>
+                    <span style="font-size:11px;color:#64748b">
+                        {{ $fixture->match_time->timezone('Asia/Jakarta')->format('d M · H:i') }} WIB
+                    </span>
+                    {{-- Label babak --}}
+                    @if ($fixture->stage === 'group')
+                        <span style="font-size:11px;color:#64748b"> · Grup {{ $fixture->group }}</span>
+                    @else
+                        <div style="margin-top:3px">
+                            @php
+                                $stageColor = match($fixture->stage) {
+                                    'round_of_32'   => ['bg' => 'rgba(99,102,241,0.1)',  'border' => 'rgba(99,102,241,0.3)',  'color' => '#818cf8'],
+                                    'round_of_16'   => ['bg' => 'rgba(59,130,246,0.1)',  'border' => 'rgba(59,130,246,0.3)',  'color' => '#60a5fa'],
+                                    'quarter_final' => ['bg' => 'rgba(245,158,11,0.1)',  'border' => 'rgba(245,158,11,0.3)',  'color' => '#fbbf24'],
+                                    'semi_final'    => ['bg' => 'rgba(239,68,68,0.1)',   'border' => 'rgba(239,68,68,0.3)',   'color' => '#f87171'],
+                                    'third_place'   => ['bg' => 'rgba(100,116,139,0.1)', 'border' => 'rgba(100,116,139,0.3)', 'color' => '#94a3b8'],
+                                    'final'         => ['bg' => 'rgba(255,215,0,0.1)',   'border' => 'rgba(255,215,0,0.3)',   'color' => '#ffd700'],
+                                    default         => ['bg' => 'rgba(100,116,139,0.1)', 'border' => 'rgba(100,116,139,0.3)', 'color' => '#94a3b8'],
+                                };
+                            @endphp
+                            <span style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:6px;
+                                        background:{{ $stageColor['bg'] }};border:1px solid {{ $stageColor['border'] }};color:{{ $stageColor['color'] }}">
+                                {{ $fixture->stages_label }}
+                            </span>
+                        </div>
+                    @endif
+                </div>
 
                 @if ($fixture->status === 'live')
-                <span class="live-badge">
-                    <span class="live-dot"></span> LIVE
-                </span>
+                    <span class="live-badge">
+                        <span class="live-dot"></span> LIVE
+                    </span>
                 @elseif ($isLocked)
-                <span style="font-size:11px;color:#475569;font-weight:600">🔒 Terkunci</span>
+                    <span style="font-size:11px;color:#475569;font-weight:600">🔒 Terkunci</span>
                 @else
-                <span style="font-size:11px;color:#00ff87;font-weight:600">Buka</span>
+                    <span style="font-size:11px;color:#00ff87;font-weight:600">Buka</span>
                 @endif
             </div>
 

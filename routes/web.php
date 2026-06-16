@@ -38,9 +38,12 @@ Route::middleware('auth')->group(function () {
 Route::get('/fixtures', [FixtureController::class, 'index'])->name('fixtures.index');
 
 Route::middleware(['auth', AdminMiddleware::class])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/matches', [AdminMatchController::class, 'index'])->name('matches.index');
-    Route::get('/matches/{fixture}/edit', [AdminMatchController::class, 'edit'])->name('matches.edit');
-    Route::patch('/matches/{fixture}', [AdminMatchController::class, 'update'])->name('matches.update');
+    Route::get('/matches',                  [AdminMatchController::class, 'index'])->name('matches.index');
+    Route::get('/matches/create',           [AdminMatchController::class, 'create'])->name('matches.create');
+    Route::post('/matches',                 [AdminMatchController::class, 'store'])->name('matches.store');
+    Route::get('/matches/{fixture}/edit',   [AdminMatchController::class, 'edit'])->name('matches.edit');
+    Route::patch('/matches/{fixture}',      [AdminMatchController::class, 'update'])->name('matches.update');
+    Route::delete('/matches/{fixture}',     [AdminMatchController::class, 'destroy'])->name('matches.destroy');
 });
 
 require __DIR__ . '/auth.php';
